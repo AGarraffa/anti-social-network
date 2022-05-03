@@ -1,0 +1,17 @@
+{
+  "name": "week18",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "node index",
+    "seed": "node utils/seed"
+  },
+  "author": "Alfred Garraffa",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^6.0.13"
+  }
+}
