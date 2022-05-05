@@ -52,8 +52,6 @@ async function addUser(req, res) {
 
 };
 
-// TODO: write the put and delete route, as well as work on deleting thoughts when the user is deleted and then write post and delete to the friends list
-
 // deletes a user
 async function deleteUser(req, res) {
 
@@ -96,22 +94,13 @@ async function cascadeThought(req, res) {
 // updates a single user
 async function updateUser(req, res) {
 
-    let update = {};
-
-    // logic to only update the fields that are provided
-    if (req.body.userName) {
-        update.userName = req.body.userName;
-    };
-
-    if (req.body.email) {
-        update.email = req.body.email;
-    };
-
     try {
+
+        // console.log(update);
 
         const userData = await User.findOneAndUpdate(
             { _id: req.params.userId },
-            { update }
+            { userName: req.body.userName, email: req.body.email }
         ).select('-__v');
 
 
