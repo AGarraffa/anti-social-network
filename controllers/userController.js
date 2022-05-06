@@ -6,7 +6,9 @@ async function getUsers(req, res) {
     
     try {
 
-        const userData = await User.find();
+        const userData = await User.find()
+        .populate('thoughts')
+        .populate('friends');
         return res.status(200).json(userData);
 
     } catch (err) {
@@ -21,7 +23,10 @@ async function getSingleUser(req, res) {
 
     try {
         
-        const userData = await User.findById(req.params.userId).select('-__v');
+        const userData = await User.findById(req.params.userId)
+        .select('-__v')
+        .populate('thoughts')
+        .populate('friends');
     
         if (!userData) {
             return res.status(404).json({ message: 'No user with that ID found' });
@@ -63,9 +68,10 @@ async function deleteUser(req, res) {
             return res.status(404).json({message: 'No user with that ID found'});
         }
 
-        const thoughtData = await cascadeThought(req, res);
+        // const thoughtData = await cascadeThought(req, res);
+        const thoughtData = await Thought.deleteMany({userId: req.params.userId}).select('-__v');
 
-        return res.status(200).json(userData);
+        return res.status(200).json({ message: 'User has been deleted' });
 
         // 
     } catch (err) {
@@ -74,29 +80,10 @@ async function deleteUser(req, res) {
     }
 };
 
-
-// used for deleting thoughts of a removed user
-async function cascadeThought(req, res) {
-
-    try {
-
-        const thoughtData = await Thought.deleteMany({userId: req.params.userId}).select('-__v');
-
-        return res.status(200).json(thoughtData);
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json(err);
-    }
-};
-
-
 // updates a single user
 async function updateUser(req, res) {
 
     try {
-
-        // console.log(update);
 
         const userData = await User.findOneAndUpdate(
             { _id: req.params.userId },
@@ -109,9 +96,6 @@ async function updateUser(req, res) {
         }
 
         return res.status(200).json(userData);
-
-        // just messing around with ternary operators
-        // !userData ? res.status(404).json({message: 'No user with that ID found'}) : res.status(200).json(userData);
         
     } catch (err) {
         console.log(err);
@@ -119,7 +103,7 @@ async function updateUser(req, res) {
     }
 };
 
-
+// needs work
 async function addFriend(req, res) {
 
     try {
@@ -130,13 +114,10 @@ async function addFriend(req, res) {
             return res.status(404).json({ message: 'No user with that ID found'});
         }
 
-        let friendArr = userData.friends;
-
-        friendArr.push(req.params.friendId);
-
         const updatedUserData = await User.findOneAndUpdate(
             {_id: req.params.userId},
-            { friends: friendArr}
+            { friends: req.params.friendId},
+            { new: true }
             ).select('-__v');
 
         return res.status(200).json(updatedUserData);

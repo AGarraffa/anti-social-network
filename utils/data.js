@@ -18,15 +18,17 @@ const users = [
         friends: [],
     },
     {
-        userName: 'Test 3',
-        email: 'test3@test.com',
-        thoughts: [],
-        friends: [],
-    },
-    {
         userName: 'Test 4',
         email: 'test4@test.com',
         thoughts: [],
         friends: [],
     },
+    {
+        userName: 'Test 5',
+        email: 'test5@test.com',
+        thoughts: [],
+        friends: [],
+    },
 ]
+
+module.exports = users;
