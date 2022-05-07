@@ -8,7 +8,8 @@ async function getUsers(req, res) {
 
         const userData = await User.find()
         .populate('thoughts')
-        .populate('friends');
+        // for whatever reason I was unable to populate the friends field with just the userName. As such I've omitted it from population for ease of use
+        // .populate('friends');
         return res.status(200).json(userData);
 
     } catch (err) {
@@ -68,7 +69,7 @@ async function deleteUser(req, res) {
             return res.status(404).json({message: 'No user with that ID found'});
         }
 
-        // const thoughtData = await cascadeThought(req, res);
+        // deletes all associated thoughts
         const thoughtData = await Thought.deleteMany({userId: req.params.userId}).select('-__v');
 
         return res.status(200).json({ message: 'User has been deleted' });
@@ -87,7 +88,8 @@ async function updateUser(req, res) {
 
         const userData = await User.findOneAndUpdate(
             { _id: req.params.userId },
-            { userName: req.body.userName, email: req.body.email }
+            { userName: req.body.userName, email: req.body.email }, 
+            { new: true }
         ).select('-__v');
 
 
@@ -103,7 +105,6 @@ async function updateUser(req, res) {
     }
 };
 
-// needs work
 async function addFriend(req, res) {
 
     try {
@@ -128,4 +129,26 @@ async function addFriend(req, res) {
     }
 }
 
-module.exports = { getUsers, getSingleUser, addUser, deleteUser, updateUser, addFriend };
+async function deleteFriend(req, res) {
+
+    try {
+
+        const userData = await User.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $pull: { friends: { _id: req.params.friendId } } },
+            { new: true }
+        ).select('-__v');
+
+        if (!userData) {
+            return res.status(404).json({ message: 'No user with that ID found'});
+        }
+
+        return res.status(200).json(userData);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+}
+
+module.exports = { getUsers, getSingleUser, addUser, deleteUser, updateUser, addFriend, deleteFriend };

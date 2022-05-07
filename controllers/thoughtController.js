@@ -114,32 +114,50 @@ async function updateThought(req, res) {
     }
 };
 
-// make this a reaction function
-// async function addFriend(req, res) {
+// add a reaction
+async function addReaction(req, res) {
 
-//     try {
+    try {
 
-//         const userData = await User.findById(req.params.userId).select('-__v');;
+        const thoughtData = await Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId },
+            { $addToSet: { reactions: req.body } },
+            { new: true } 
+        ).select('-__v');
 
-//         if (!userData) {
-//             return res.status(404).json({ message: 'No user with that ID found'});
-//         }
+        if (!thoughtData) {
+            return res.status(404).json({ message: 'No thought with that ID found' });
+        }
 
-//         let friendArr = userData.friends;
+        return res.status(200).json(thoughtData);
 
-//         friendArr.push(req.params.friendId);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json(err);
+    }
+};
 
-//         const updatedUserData = await User.findOneAndUpdate(
-//             {_id: req.params.userId},
-//             { friends: friendArr}
-//             ).select('-__v');
+// delete a reaction
+async function removeReaction(req, res) {
 
-//         return res.status(200).json(updatedUserData);
+    try {
 
-//     } catch (err) {
-//         console.log(err);
-//         return res.status(500).json(err);
-//     }
-// }
+        const thoughtData = await Thought.findOneAndUpdate(
+            { _id: req.params.thoughtId },
+            { $pull: { reactions: { reactionId: req.params.reactionId } } },
+            { new: true }
+        ).select('-__v');
 
-module.exports = { getThoughts, getSingleThought, addThought, deleteThought, updateThought };
+        if (!thoughtData) {
+            return res.status(400).json({ message: 'No thought with that ID found'});
+        }
+
+        return res.status(200).json(thoughtData);
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json(err);
+    }
+}
+
+module.exports = { getThoughts, getSingleThought, addThought, deleteThought, updateThought, addReaction, removeReaction };
